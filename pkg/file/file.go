@@ -2,6 +2,7 @@ package file
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/gofrs/flock"
 )
@@ -67,4 +68,10 @@ func LockFile(lockPath string, flags int) (*flock.Flock, error) {
 	}
 
 	return nil, fmt.Errorf("invalid lock flags provided")
+}
+
+// FileExists 함수는 주어진 경로의 파일 존재 여부를 반환합니다.
+func FileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }
