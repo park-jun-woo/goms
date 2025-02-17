@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"parkjunwoo.com/go/pkg/file"
+	"parkjunwoo.com/goms/pkg/file"
 )
 
 // SelfSignCertFile는 주어진 도메인명과 조직명으로 인증서를 생성하고 파일로 저장합니다.

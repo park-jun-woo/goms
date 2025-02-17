@@ -1,4 +1,4 @@
-module parkjunwoo.com/go
+module parkjunwoo.com/goms
 
 go 1.21.0
 
