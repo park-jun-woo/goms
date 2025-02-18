@@ -7,25 +7,28 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"time"
 )
 
 type RSA256 struct {
-	secret *Secret
+}
+
+func (rsa256 *RSA256) GetAlg() string {
+	return "RSA256"
+}
+
+func (rsa256 *RSA256) GetAlgIndex() uint32 {
+	return 1
 }
 
 // Encrypt 메서드: RSA-OAEP를 사용하여 payload를 암호화합니다.
-func (r256 *RSA256) Encrypt(payload []byte) ([]byte, error) {
+func (rsa256 *RSA256) Encrypt(key string, payload []byte) ([]byte, error) {
 	// 공개키 체크
-	if r256.secret == nil {
-		return nil, errors.New("secret is nil")
-	}
-	if r256.secret.PublicKey == "" {
+	if key == "" {
 		return nil, errors.New("public key is empty")
 	}
 
 	// PEM 디코딩: 공개키 PEM 블록 추출
-	block, _ := pem.Decode([]byte(r256.secret.PublicKey))
+	block, _ := pem.Decode([]byte(key))
 	if block == nil {
 		return nil, errors.New("failed to decode PEM block containing public key")
 	}
@@ -52,18 +55,15 @@ func (r256 *RSA256) Encrypt(payload []byte) ([]byte, error) {
 	return encrypted, nil
 }
 
-// Decrypt 메서드: RSA-OAEP를 사용하여 tokenBody를 복호화합니다.
-func (r256 *RSA256) Decrypt(tokenBody []byte) ([]byte, error) {
+// Decrypt 메서드: RSA-OAEP를 사용하여 encrypted를 복호화합니다.
+func (rsa256 *RSA256) Decrypt(key string, encrypted []byte) ([]byte, error) {
 	// 개인키 체크
-	if r256.secret == nil {
-		return nil, errors.New("secret is nil")
-	}
-	if r256.secret.PrivateKey == "" {
+	if key == "" {
 		return nil, errors.New("private key is empty")
 	}
 
 	// PEM 디코딩: 개인키 PEM 블록 추출
-	block, _ := pem.Decode([]byte(r256.secret.PrivateKey))
+	block, _ := pem.Decode([]byte(key))
 	if block == nil {
 		return nil, errors.New("failed to decode PEM block containing private key")
 	}
@@ -85,7 +85,7 @@ func (r256 *RSA256) Decrypt(tokenBody []byte) ([]byte, error) {
 
 	// RSA-OAEP 복호화 (SHA-256 해시 사용)
 	hash := sha256.New()
-	decrypted, err := rsa.DecryptOAEP(hash, rand.Reader, priv, tokenBody, nil)
+	decrypted, err := rsa.DecryptOAEP(hash, rand.Reader, priv, encrypted, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -93,11 +93,12 @@ func (r256 *RSA256) Decrypt(tokenBody []byte) ([]byte, error) {
 	return decrypted, nil
 }
 
-func GenerateSecretRSA256(kid uint32, expire string) (*Secret, error) {
+// RSA256 키 생성
+func GenerateSecretRSA256() (string, string, error) {
 	// RSA 개인키 생성
 	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return nil, err
+		return "", "", err
 	}
 
 	// 개인키를 PKCS#1 DER 형식으로 인코딩 후 PEM 블록으로 변환
@@ -111,7 +112,7 @@ func GenerateSecretRSA256(kid uint32, expire string) (*Secret, error) {
 	// 공개키를 PKIX (X.509) DER 형식으로 인코딩 후 PEM 블록으로 변환
 	pubDER, err := x509.MarshalPKIXPublicKey(&privKey.PublicKey)
 	if err != nil {
-		return nil, err
+		return "", "", err
 	}
 	pubBlock := &pem.Block{
 		Type:  "PUBLIC KEY",
@@ -119,21 +120,6 @@ func GenerateSecretRSA256(kid uint32, expire string) (*Secret, error) {
 	}
 	pubPEM := pem.EncodeToMemory(pubBlock)
 
-	// 만료 기간 파싱
-	duration, err := time.ParseDuration(expire)
-	if err != nil {
-		return nil, err
-	}
-
-	// 만료 시간 계산
-	expireTime := time.Now().Add(duration)
-
-	// Secret 구조체 생성
-	return &Secret{
-		KID:        kid,
-		Alg:        "RSA256",
-		PublicKey:  string(pubPEM),
-		PrivateKey: string(privPEM),
-		Expire:     expireTime,
-	}, nil
+	// PEM 문자열 반환
+	return string(pubPEM), string(privPEM), nil
 }
