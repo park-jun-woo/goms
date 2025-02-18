@@ -1,7 +1,6 @@
 package security
 
 import (
-	"encoding/json"
 	"time"
 )
 
@@ -35,13 +34,6 @@ type SecretResponse struct {
 	Secrets []Secret `json:"secrets"`
 }
 
-func requestSecret(host string, port uint16, sid string, saToken string) ([]byte, error) {
-	// 시크릿 데이터 요청
-
-	// 시크릿 데이터를 JSON 문자열로 반환
-	return nil, nil
-}
-
 // NewSecretManager 함수: 주어진 경로에서 시크릿 데이터를 읽어 SecretManager를 생성
 func NewSecretManager(host string, port uint16, sid string, saToken string) *SecretManager {
 	// SecretManager 생성
@@ -53,22 +45,11 @@ func NewSecretManager(host string, port uint16, sid string, saToken string) *Sec
 		saToken:   saToken,
 	}
 	// https://host에서 시크릿 데이터를 요청
-	secretJsonString, err := requestSecret(host, port, sid, saToken)
 
-	if err != nil {
-		return nil
-	}
 	// 시크릿 데이터 JSON 문자열을 파싱
-	var secretData SecretResponse
-	err = json.Unmarshal(secretJsonString, &secretData)
-	if err != nil {
-		return nil
-	}
+
 	// secretData.Secrets를 순회하며
-	for _, secret := range secretData.Secrets {
-		// secretMap[kid]에 저장
-		sm.secretMap[secret.KID] = secret
-	}
+
 	// SecretManager를 반환
 	return sm
 }
