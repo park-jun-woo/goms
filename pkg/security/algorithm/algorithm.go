@@ -13,7 +13,7 @@ type Algorithm interface {
 
 // Secret 구조체: 개인키, 공개키, 추가 정보를 포함
 type Secret struct {
-	KID        uint8     `json:"kid"`
+	KID        uint32    `json:"kid"`
 	Alg        string    `json:"alg"`
 	PublicKey  string    `json:"publicKey"`
 	PrivateKey string    `json:"privateKey"`
@@ -31,7 +31,7 @@ func GetAlgorithm(secret *Secret) (Algorithm, error) {
 	}
 }
 
-func GenerateSecret(alg string, kid uint8, expire string) (*Secret, error) {
+func GenerateSecret(alg string, kid uint32, expire string) (*Secret, error) {
 	switch alg {
 	case "RSA256":
 		secret, err := GenerateSecretRSA256(kid, expire)

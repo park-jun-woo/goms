@@ -93,7 +93,7 @@ func (r256 *RSA256) Decrypt(tokenBody []byte) ([]byte, error) {
 	return decrypted, nil
 }
 
-func GenerateSecretRSA256(kid uint8, expire string) (*Secret, error) {
+func GenerateSecretRSA256(kid uint32, expire string) (*Secret, error) {
 	// RSA 개인키 생성
 	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {

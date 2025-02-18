@@ -13,14 +13,14 @@ import (
 	"parkjunwoo.com/goms/pkg/file"
 )
 
-// SelfSignCertFile는 주어진 도메인명과 조직명으로 인증서를 생성하고 파일로 저장합니다.
-func SelfSignCertFile(dnsname string, organizationName string, expire string, certPath string, keyPath string) error {
+// SelfSignedCertFile는 주어진 도메인명과 조직명으로 인증서를 생성하고 파일로 저장합니다.
+func SelfSignedCertFile(dnsname string, organizationName string, expire string, certPath string, keyPath string) error {
 	// 파일이 존재하면 생성하지 않음
 	if file.FileExists(certPath) && file.FileExists(keyPath) {
 		return nil
 	}
 	// 인증서 생성
-	cert, key, err := SelfSignCert(dnsname, organizationName, expire)
+	cert, key, err := SelfSignedCert(dnsname, organizationName, expire)
 	if err != nil {
 		return err
 	}
@@ -47,9 +47,9 @@ func SelfSignCertFile(dnsname string, organizationName string, expire string, ce
 	return nil
 }
 
-// SelfSignCert는 주어진 도메인명과 조직명으로 인증서를 생성합니다.
+// SelfSignedCert는 주어진 도메인명과 조직명으로 인증서를 생성합니다.
 // string CERT, string KEY, error 반환
-func SelfSignCert(dnsname string, organizationName string, expire string) (string, string, error) {
+func SelfSignedCert(dnsname string, organizationName string, expire string) (string, string, error) {
 	// 개인키 생성
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
